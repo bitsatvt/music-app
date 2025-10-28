@@ -18,9 +18,10 @@ TODO: WSL & Github setup instructions.
 
 ### 2. Install Node.js via NVM & Setup Github SSH
 
-Install **Node Version Manager (NVM)**:
-
 ```
+Install Node Version Manager (NVM):
+
+
 $ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash
 
 
@@ -71,12 +72,13 @@ $ pnpm install
 
 
 You’re ready to run the app locally!
+```
 
-Usage
+## Usage
 TODO: Add usage instructions here (how to start the app, run tests, etc.)
 
-Features
+## Features
 TODO: List key features of the app here.
 
-Tech Stack
+## Tech Stack
 TODO: List frontend, backend, database, and other technologies used.
