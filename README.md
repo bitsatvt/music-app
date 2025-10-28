@@ -1,22 +1,77 @@
-# music-app
-A music learning platform that uses quiz games and audio tools to make music education more accessible and engaging.
+# Music Learning App
+A webapp that allows users to track and improve their music skills with interactive lessons, quizzes, and games to make music literacy more accessible and engaging for all.
 
+# For Developers
 
-To install NodeJS:
+## Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
 
-# 1. Install nvm
+## Installation
+
+### 1. WSL Setup
+TODO: WSL & Github setup instructions.
+
+---
+
+### 2. Install Node.js via NVM
+
+Install **Node Version Manager (NVM)**:
+
+```
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash
+Load NVM into your terminal session:
 
-# 2. Load nvm in the current shell
-export NVM_DIR="$HOME/.nvm"
+
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+Install the latest LTS (Long Term Support) version of Node.js:
 
-# 3. Install the latest LTS version of Node.js
+
 nvm install --lts
-
-# 4. Use the installed version
 nvm use --lts
+Check installation:
 
-# 5. Verify installation
+
 node -v
 npm -v
+3. Add Your SSH Key (for GitHub access)
+Generate an SSH key (if you don’t have one):
+
+
+ssh-keygen -t ed25519 -C "your_email@example.com"
+Start the SSH agent and add your key:
+
+
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+Copy your public key and add it to GitHub:
+
+
+cat ~/.ssh/id_ed25519.pub
+Paste the output in GitHub → Settings → SSH and GPG keys → New SSH key.
+
+4. Install Project Dependencies
+Navigate to the project directory:
+
+
+cd path/to/music-app
+Install dependencies:
+
+
+npm install
+# or if using pnpm
+pnpm install
+
+You’re ready to run the app locally!
+
+Usage
+TODO: Add usage instructions here (how to start the app, run tests, etc.)
+
+Features
+TODO: List key features of the app here.
+
+Tech Stack
+TODO: List frontend, backend, database, and other technologies used.
