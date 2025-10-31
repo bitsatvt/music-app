@@ -61,7 +61,7 @@ Paste the output in GitHub → Settings → SSH and GPG keys → New SSH key.
 
 Navigate to the project directory:
 
-$ cd path/to/music-app
+$ cd path/to/music-app/frontend
 
 
 Install dependencies:
