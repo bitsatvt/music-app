@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -11,6 +12,11 @@ export default function Home() {
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             yashvsana was here.
           </p>
+          <Link href="/tonejs">
+            <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+              Go to ToneJS testing page
+            </button>
+          </Link>
         </div>
       </main>
     </div>
