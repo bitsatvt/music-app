@@ -1,18 +1,18 @@
-import Image from "next/image";
+import {Button} from '@/components/ui/button';
+import {ModeToggle} from '@/components/ui/ModeToggle';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Welcome!
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            yashvsana was here.
-          </p>
-        </div>
-      </main>
+    <>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 dark:bg-background">
+      <h1 className="mb-4 text-4xl font-bold text-primary">Welcome to Gliss</h1>
+      <Button variant="ghost">
+        Get Started
+      </Button>
     </div>
+    <div className="fixed bottom-4 right-4 text-sm text-muted-foreground">
+      <ModeToggle />
+    </div>
+    </>
   );
 }
