@@ -1,0 +1,4 @@
+The folder is in parenthesis which means that the website will not explicitly show the route:  localhost:3000/(SubPages)/page*
+Rather, it is ignored and will only show the page inside that 'group' when routed to:          localhost:3000/page*
+
+This is a group folder: https://nextjs.org/docs/app/getting-started/project-structure#route-groups-and-private-folders
