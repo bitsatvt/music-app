@@ -62,6 +62,7 @@ export default function LoginCard() {
 
                 <Input id="password" type="password" placeholder="Create a password" required />
                 <Input id="password" type="password" placeholder="Confirm your password" required />
+
               </div>
 
             </div>
@@ -70,9 +71,13 @@ export default function LoginCard() {
 
         {/* Footer */}
         <CardFooter className="flex-col gap-2">
+
           <Button type="submit" className="w-full">Create account</Button>
+            
             <p> or </p>
+            
           <Button variant="outline" className="w-full">Sign up with Google</Button>
+
         </CardFooter>
 
       </Card>
@@ -81,7 +86,7 @@ export default function LoginCard() {
       <div className="fixed bottom-4 right-4 text-sm text-muted-foreground">
         <ModeToggle />
       </div>
-      
+
     </>
   )
 }
