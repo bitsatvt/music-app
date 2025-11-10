@@ -1,5 +1,5 @@
 import Login from '@/components/pages/AccountGroup/login';
-import Header from '@/components/shared/header';
+import Header from '@/components/shared/Header';
 import { ModeToggle } from '@/components/shared/ModeToggle';
 
 export default function LoginPage() {

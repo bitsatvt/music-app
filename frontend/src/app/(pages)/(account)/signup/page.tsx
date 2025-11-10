@@ -1,5 +1,5 @@
 import Signup from '@/components/pages/AccountGroup/signup';
-import Header from '@/components/shared/header';
+import Header from '@/components/shared/Header';
 import { ModeToggle } from '@/components/shared/ModeToggle';
 
 
