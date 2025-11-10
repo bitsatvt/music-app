@@ -1,5 +1,4 @@
 import {Button} from '@/components/ui/button';
-import {ModeToggle} from '@/components/shared/ModeToggle';
 
 export function LandingPage() {
     return (
