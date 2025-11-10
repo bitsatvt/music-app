@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ModeToggle } from "@/components/shared/ModeToggle"
 import Link from "next/link"
 
 export default function LoginCard() {
@@ -69,7 +68,7 @@ export default function LoginCard() {
 
         {/* Footer */}
         <CardFooter className="flex-col gap-2">
-          
+
           <Button type="submit" className="w-full">
             Login
           </Button>
@@ -81,12 +80,6 @@ export default function LoginCard() {
         </CardFooter>
 
       </Card>
-
-      {/* Theme Toggle */}
-      <div className="fixed bottom-4 right-4 text-sm text-muted-foreground">
-        <ModeToggle />
-      </div>
-
     </>
   )
 }

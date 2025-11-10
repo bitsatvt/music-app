@@ -1,5 +1,6 @@
 import Signup from '@/components/pages/AccountGroup/signup';
 import Header from '@/components/shared/header';
+import { ModeToggle } from '@/components/shared/ModeToggle';
 
 
 export default function SignupPage() {
@@ -9,6 +10,7 @@ export default function SignupPage() {
         <div className="flex min-h-screen items-center justify-center bg-background px-4">
             <Signup />
         </div>
+        <ModeToggle />
         </>
 
     );

@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ModeToggle } from "@/components/shared/ModeToggle"
 import Link from "next/link"
 
 export default function LoginCard() {
@@ -75,18 +74,12 @@ export default function LoginCard() {
           <Button type="submit" className="w-full">Create account</Button>
             
             <p> or </p>
-            
+
           <Button variant="outline" className="w-full">Sign up with Google</Button>
 
         </CardFooter>
 
       </Card>
-
-      {/* Theme Toggle */}
-      <div className="fixed bottom-4 right-4 text-sm text-muted-foreground">
-        <ModeToggle />
-      </div>
-
     </>
   )
 }

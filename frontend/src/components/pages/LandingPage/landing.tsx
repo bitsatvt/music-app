@@ -10,10 +10,6 @@ export function LandingPage() {
             Get Started
           </Button>
         </div>
-        
-        <div className="fixed bottom-4 right-4 text-sm text-muted-foreground">
-          <ModeToggle />
-        </div>
     </>
         );
 }
