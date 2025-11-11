@@ -74,7 +74,7 @@ export default function LoginCard() {
           </Button>
 
           <Button variant="outline" className="w-full">
-            Login with Google
+            Continue as Guest
           </Button>
 
         </CardFooter>
