@@ -13,7 +13,7 @@ export default function Header() {
             <nav className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
                     <Link href="/login" className="text-primary hover:text-accent transition">
-                        <Button variant="default" className="text-prwwimary text-black hover:text-accent transition">
+                        <Button variant="default">
                             Log In
                         </Button>
                     </Link>
