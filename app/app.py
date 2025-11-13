@@ -1,16 +1,20 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from flask_restful import Resource, Api, reqparse, fields, marshal_with, abort
-from werkzeug.security import generate_password_hash
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
 
 # CONFIGRING CONNECTION TO THE DATABASE
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:hung25032007@localhost/music_app_db'
 app.config['SECRET_KEY'] = 'supersecretkeymusicapp'
+
+# JWT config
+app.config["JWT_SECRET_KEY"] = "super-secret-jwt-key-for-music-app"
+
 db = SQLAlchemy(app)
-api = Api(app)
+jwt = JWTManager(app)
 
 class User(db.Model):
     __tablename__   = "users"
@@ -23,85 +27,103 @@ class User(db.Model):
     def __repr__(self):
         return f"User(id = {self.user_id}, name = {self.username}, email = {self.email})"
 
-# Controlling parameters required to be able to pass to the server
-user_args = reqparse.RequestParser()
-user_args.add_argument('username', type=str, required=True, help="Username cannot be blank")
-user_args.add_argument('password', type=str, required=True, help="Password cannot be blank")
-user_args.add_argument('email', type=str, required=True, help="Email cannot be blank")
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-# The information displayed in a GET method
-userFields = {
-    'user_id':fields.Integer,
-    'username':fields.String,
-    'creation_date':fields.DateTime
-}
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
-class UsersResource(Resource):
-    # NOTE: GET
-    # Turn the userFields into a JSON file
-    @marshal_with(userFields) 
-    def get(self):
-        # Get all users from the db
-        users = User.query.all()
-        return users
-    
-    # NOTE: POST
-    @marshal_with(userFields)
-    def post(self):
-        args = user_args.parse_args()
-        pw_hash = generate_password_hash(args['password'])
-        user = User(username=args['username'], password_hash=pw_hash, email=args['email'])
-        db.session.add(user)
-        db.session.commit()
-        users = User.query.all()
-        return users, 201 # Created
 
-# Add an endpoint    
-api.add_resource(UsersResource, "/api/users/")
-
-class UserResource(Resource):
-    # NOTE: GET ONE
-    @marshal_with(userFields)
-    def get(self, user_id):
-        # Filter by the first user found by id
-        user = User.query.filter_by(user_id=user_id).first()
-        # If not found, abort
-        if not user:
-            abort(404, "User not found")
-        # Else return the user
-        return user
-    
-    # NOTE: UPDATE ONE
-    @marshal_with(userFields)
-    def patch(self, user_id):
-        args = user_args.parse_args()
-        user = User.query.filter_by(user_id=user_id).first()
-        if not user:
-            abort(404, "User not found")
-        user.username = args['username']
-        user.password = args['password']
-        user.email = args['email']
-        db.session.commit()
-        return user
-    
-    # NOTE: DELETE ONE
-    @marshal_with(userFields)
-    def delete(self, user_id):
-        args = user_args.parse_args()
-        user = User.query.filter_by(user_id=user_id).first()
-        if not user:
-            abort(404, "User not found")
-        db.session.delete(user)
-        db.session.commit()
-        users = User.query.all()
-        return users, 204 # SUCCESS DELETE
-
-api.add_resource(UserResource, "/api/users/<int:user_id>")
-
+# Main page
 @app.route('/')
 def home():
-    return '<h1>Flask</h1>'
+    return jsonify({"status": "ok"}) # Health check
 
+# Register: expects JSON { "username": "...", "email": "...", "password": "..." }
+# Implement token 
+@app.route("/api/register", methods=["POST"])
+def register():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Missing JSON body"}), 400
+
+    username = data.get("username")
+    password = data.get("password")
+    email = data.get("email")
+
+    if not username or not email or not password:
+        return jsonify({"error": "Username, email, and password required"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    # Check if the user email already existed
+    if user:
+        return jsonify({"error": "User with this email already exists"}), 409
+    else:
+        # Create a new user
+        user = User(username=username, email=email)
+        user.set_password(password) # password_hash is set here 
+        db.session.add(user)
+        db.session.commit()
+        
+        return jsonify({
+            "message": "User registered",
+            "user": {
+                "user_id": user.user_id,
+                "username": user.username,
+                "email": user.email,
+            },
+        }), 201
+    
+
+# Login
+@app.route("/api/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Missing JSON body"}), 400
+    
+    # Collect info from the json
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    
+    if not user or not user.check_password(password):
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    # Create a new token
+    # identity must be a string 
+    access_token = create_access_token(identity=str(user.user_id))
+
+    return jsonify({
+        "message": "Login successful",
+        "access_token": access_token,
+        "user": {
+            "user_id": user.user_id,
+            "username": user.username,
+            "email": user.email,
+        }
+    }), 200
+
+
+# Dashboard
+@app.route("/api/me", methods=["GET"])
+@jwt_required()
+def me():
+    # We want the id to be an integer
+    current_user_id = int(get_jwt_identity())
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({
+        "user_id": user.user_id,
+        "username": user.username,
+        "email": user.email,
+    }), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
