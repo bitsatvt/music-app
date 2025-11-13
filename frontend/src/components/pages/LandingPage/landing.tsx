@@ -1,5 +1,4 @@
 import {Button} from '@/components/ui/button';
-import {ModeToggle} from '@/components/shared/ModeToggle';
 
 export function LandingPage() {
     return (
@@ -9,10 +8,6 @@ export function LandingPage() {
           <Button variant="ghost">
             Get Started
           </Button>
-        </div>
-        
-        <div className="fixed bottom-4 right-4 text-sm text-muted-foreground">
-          <ModeToggle />
         </div>
     </>
         );
