@@ -75,7 +75,7 @@ export default function LoginCard() {
             
             <p> or </p>
 
-          <Button variant="outline" className="w-full">Sign up with Google</Button>
+          <Button variant="outline" className="w-full">Continue as Guest</Button>
 
         </CardFooter>
 
