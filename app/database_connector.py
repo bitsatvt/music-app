@@ -45,6 +45,15 @@ def get_user(user, password):
     finally:
         session.close()
 
+def get_user_by_id(user_id):
+    session = get_session()
+    try:
+        query = select(users_table).where(users_table.c.user_id == user_id)
+        result = session.execute(query).mappings().fetchone()
+        return result if result else None
+    finally:
+        session.close()
+
 def delete_user(user, password):
     session = get_session()
     try:
@@ -81,5 +90,14 @@ def update_password(username, old_password, new_password):
     except Exception:
         session.rollback()
         return False
+    finally:
+        session.close()
+
+def get_all_users():
+    session = get_session()
+    try:
+        query = select(users_table)
+        result = session.execute(query).mappings().all()
+        return result if result else None
     finally:
         session.close()
