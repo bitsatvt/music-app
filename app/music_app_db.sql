@@ -1,3 +1,4 @@
+USE music_app_db;
 DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
