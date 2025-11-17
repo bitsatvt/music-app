@@ -10,62 +10,76 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ModeToggle } from "@/components/shared/ModeToggle"
+import Link from "next/link"
 
 export default function LoginCard() {
   return (
     <>
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Create your account</CardTitle>
-        <CardDescription>
-          Create your account with your email username and a password.
-        </CardDescription>
-        <CardAction>
-          <Button variant="link">Log In</Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <div className="flex flex-col gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">New Password</Label>
+      <Card className="w-full max-w-sm">
+          
+        {/* Header */}
+        <CardHeader>
+            
+          <CardTitle>
+            Create your account
+          </CardTitle>
+            
+          <CardDescription>
+            Create your account with your email username and a password.
+          </CardDescription>
+            
+          <CardAction>
+            <Link href="/login">
+              <Button variant="ghost">Log In</Button>
+            </Link>
+          </CardAction>
+
+        </CardHeader>
+
+        {/* Content */}
+        <CardContent>
+          <form>
+            <div className="flex flex-col gap-6">
+                
+              {/* Email Input */}
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                />
               </div>
-              <Input id="password" type="password" placeholder="Create a password" required />
-            </div>
-            <div className="grid gap-2">
-              <Input id="password" type="password" placeholder="Confirm your password" required />
-            </div>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex-col gap-2">
-        <Button type="submit" className="w-full">
-          Create account
-        </Button>
-        <p>
-            or
-        </p>
-        <Button variant="outline" className="w-full">
-          Sign up with Google
-        </Button>
-      </CardFooter>
-    </Card>
+                
+              {/* Password Input */}
+              <div className="grid gap-2">
+                  
+                <div className="flex items-center">
+                  <Label htmlFor="password">New Password</Label>
+                </div>
 
+                <Input id="password" type="password" placeholder="Create a password" required />
+                <Input id="password" type="password" placeholder="Confirm your password" required />
 
-    <div className="fixed bottom-4 right-4 text-sm text-muted-foreground">
-      <ModeToggle />
-    </div>
+              </div>
+
+            </div>
+          </form>
+        </CardContent>
+
+        {/* Footer */}
+        <CardFooter className="flex-col gap-2">
+
+          <Button type="submit" className="w-full">Create account</Button>
+            
+            <p> or </p>
+
+          <Button variant="outline" className="w-full">Continue as Guest</Button>
+
+        </CardFooter>
+
+      </Card>
     </>
   )
 }

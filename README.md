@@ -98,3 +98,7 @@ TODO: List key features of the app here.
 
 ## Tech Stack
 TODO: List frontend, backend, database, and other technologies used.
+
+Frontend: next.js
+Backend: flask
+Database: mysql

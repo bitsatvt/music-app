@@ -1,1 +1,0 @@
-TODO: Create a user interface for sign up page for users creating an account for the first time.
