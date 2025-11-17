@@ -36,7 +36,7 @@ export default function QuizCard() {
     setSynth(s)
   }, [])
 
-  // Generates a new question
+  // Makes a new question
   const generateQuiz = () => {
     const correct = notes[Math.floor(Math.random() * notes.length)]
     const incorrect = notes
@@ -83,7 +83,7 @@ export default function QuizCard() {
     setHint(`Hint: The note starts with "${currentNote.charAt(0)}"`)
   }
 
-  // Move to next question or finish quiz
+  // Move to next question or finish quiz if all 10 are answered
   const nextQuestion = () => {
     if (currentQuestion === 10) {
       setFinished(true)
@@ -103,7 +103,7 @@ export default function QuizCard() {
     generateQuiz()
   }
 
-  // Restart quiz
+  // Restart quiz - reset some of the states
   const restart = () => {
     setStarted(false)
     setFinished(false)
@@ -111,15 +111,11 @@ export default function QuizCard() {
     setCurrentQuestion(1)
   }
 
-  // ---------------------------
-  //      RENDER LOGIC
-  // ---------------------------
-
-  // Start screen
+  // Start screen - navigated to this screen from the dashboard
   if (!started) {
     return (
-      <div className="min-h-screen w-full bg-white text-black">
-        <div className="min-h-screen w-full bg-white">
+      // <div className="min-h-screen w-full bg-white text-black"> // Lightmode
+      //   <div className="min-h-screen w-full bg-white">
           <Card className="w-full max-w-2xl mx-auto mt-24 text-center p-10 bg-white border border-gray-300 shadow">
             <CardHeader>
               <CardTitle className="text-4xl font-bold mb-4 text-black">
@@ -140,15 +136,15 @@ export default function QuizCard() {
               </Button>
             </CardFooter>
           </Card>
-        </div>
-      </div>
+      //   </div>
+      // </div>
     )
   }
 
-  // Final results screen
+  // Results - if quiz is finished
   if (finished) {
     return (
-      <div className="min-h-screen w-full bg-white">
+      // <div className="min-h-screen w-full bg-white"> Lightmode
         <Card className="w-full max-w-2xl mx-auto mt-24 text-center p-10 bg-white border border-gray-300 shadow">
           <CardHeader>
             <CardTitle className="text-4xl font-bold text-black">
@@ -166,13 +162,13 @@ export default function QuizCard() {
             </Button>
           </CardFooter>
         </Card>
-      </div>
+      // </div>
     )
   }
 
-  // Active quiz screen
+  // quiz screen
   return (
-    <div className="min-h-screen w-full bg-white">
+    // <div className="min-h-screen w-full bg-white"> // Lightmode
       <Card className="w-full max-w-2xl mx-auto mt-24 text-center bg-white shadow-lg border border-gray-300 p-8">
         <CardHeader>
           <CardTitle className="text-4xl font-bold mb-2 text-black">
@@ -206,7 +202,6 @@ export default function QuizCard() {
           )}
         </CardContent>
 
-        {/* Answer choices */}
         <CardFooter className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-6">
           {choices.map((note, i) => (
             <Button
@@ -221,7 +216,6 @@ export default function QuizCard() {
           ))}
         </CardFooter>
 
-        {/* Footer controls */}
         <CardFooter className="w-full flex justify-between items-center mt-8">
           <Button
             variant="outline"
@@ -245,6 +239,6 @@ export default function QuizCard() {
           </Button>
         </CardFooter>
       </Card>
-    </div>
+    // </div>
   )
 }
