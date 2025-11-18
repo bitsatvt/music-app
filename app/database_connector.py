@@ -22,13 +22,16 @@ hash_method = os.getenv("PASSWORD_HASH_METHOD")
 
 users_table = Table("users", metadata, autoload_with=engine)
 
+
 def get_session():
     return Session(engine)
+
 
 def sign_up(user, password, email):
     session = get_session()
     try:
-        query = insert(users_table).values(username=user, password_hash=generate_password_hash(password, method=hash_method), email=email)
+        query = insert(users_table).values(username=user, password_hash=generate_password_hash(
+            password, method=hash_method), email=email)
         result = session.execute(query)
         session.commit()
         user_id = result.lastrowid
@@ -38,6 +41,7 @@ def sign_up(user, password, email):
         return None
     finally:
         session.close()
+
 
 def get_user(user, password):
     session = get_session()
@@ -52,6 +56,7 @@ def get_user(user, password):
     finally:
         session.close()
 
+
 def get_user_by_id(user_id):
     session = get_session()
     try:
@@ -61,28 +66,33 @@ def get_user_by_id(user_id):
     finally:
         session.close()
 
+
 def delete_user(user_id, password):
     session = get_session()
     try:
-        select_query = select(users_table).where(users_table.c.user_id == user_id)
+        select_query = select(users_table).where(
+            users_table.c.user_id == user_id)
         user = session.execute(select_query).mappings().fetchone()
-        
+
         if not user:
             return False
         if not check_password_hash(user["password_hash"], password):
             return False
-        
-        delete_query = delete(users_table).where(users_table.c.user_id == user["user_id"])
+
+        delete_query = delete(users_table).where(
+            users_table.c.user_id == user["user_id"])
         result = session.execute(delete_query)
         session.commit()
         return result.rowcount > 0
     finally:
         session.close()
 
+
 def update_username(user_id, new_user):
     session = get_session()
     try:
-        query = update(users_table).where(users_table.c.user_id == user_id).values(username=new_user)
+        query = update(users_table).where(
+            users_table.c.user_id == user_id).values(username=new_user)
         result = session.execute(query)
         if result.rowcount == 0:
             session.rollback()
@@ -95,10 +105,12 @@ def update_username(user_id, new_user):
     finally:
         session.close()
 
+
 def update_password(user_id, old_password, new_password):
     session = get_session()
     try:
-        select_query = select(users_table).where(users_table.c.user_id == user_id)
+        select_query = select(users_table).where(
+            users_table.c.user_id == user_id)
         user = session.execute(select_query).mappings().fetchone()
 
         if not user:
@@ -106,7 +118,8 @@ def update_password(user_id, old_password, new_password):
         if not check_password_hash(user["password_hash"], old_password):
             return False
 
-        update_query = update(users_table).where(users_table.c.user_id == user["user_id"]).values(password_hash=generate_password_hash(new_password, method=hash_method))
+        update_query = update(users_table).where(users_table.c.user_id == user["user_id"]).values(
+            password_hash=generate_password_hash(new_password, method=hash_method))
         result = session.execute(update_query)
         session.commit()
         return result.rowcount > 0
@@ -115,6 +128,7 @@ def update_password(user_id, old_password, new_password):
         return False
     finally:
         session.close()
+
 
 def get_all_users():
     session = get_session()

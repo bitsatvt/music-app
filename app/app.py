@@ -23,7 +23,7 @@ def signup():
     new_user = sign_up(data["username"], data["password"], data["email"])
     if not new_user:
         return jsonify({"Error": "Sign Up Failed, Username or email already exists"}), 400
-    
+
     access_token = create_access_token(identity=str(new_user["user_id"]))
 
     return jsonify({"Message": "Account creation successful!",
@@ -32,6 +32,7 @@ def signup():
                         "username": new_user["username"]
                     },
                     "Token": access_token}), 201
+
 
 '''
     Endpoint for logging into the application, returns a user 
@@ -44,15 +45,16 @@ def login():
     user = get_user(data["username"], data["password"])
     if not user:
         return jsonify({"Error": "Invalid username or password"}), 401
-    
+
     access_token = create_access_token(identity=str(user["user_id"]))
 
-    return jsonify({"Message": "Login Successful!", 
+    return jsonify({"Message": "Login Successful!",
                     "User": {
                         "user_id": user["user_id"],
                         "username": user["username"]
                     },
                     "Token": access_token}), 200
+
 
 '''
     Endpoint for deleting a user from the database, returns the messsage 
@@ -67,6 +69,7 @@ def delete():
     if not success:
         return jsonify({"Error": "Delete Failed"}), 401
     return jsonify({"Message": "Account delete successful!"}), 200
+
 
 '''
     Endpoint for updating username, returns the message for whether the username
@@ -85,6 +88,7 @@ def update_user():
         return jsonify({"Error": "The new username is already taken"}), 409
     return jsonify({"Message": "Username update successful!"}), 200
 
+
 '''
     Endpoint for updating password, returns the message for whether the password
     update was successful or not.
@@ -94,10 +98,12 @@ def update_user():
 def update_pass():
     data = request.json
     user_id = get_jwt_identity()
-    success = update_password(user_id, data["old_password"], data["new_password"])
+    success = update_password(
+        user_id, data["old_password"], data["new_password"])
     if not success:
         return jsonify({"Error": "Password update failed"}), 400
     return jsonify({"Message": "Password update successful!"}), 200
+
 
 '''
     Endpoint for getting all users in the database, returns message for whether retrieval
@@ -112,6 +118,7 @@ def get_users():
     return jsonify({"Message": "Successful retrieval of users!",
                     "Users": [{"username": user["username"], "user_id": user["user_id"]} for user in users]}), 200
 
+
 '''
     Endpoint for retrieving the user based on the token passed in, returns 
     whether user retrieval was successful and the user dictionary
@@ -125,6 +132,7 @@ def profile():
         return jsonify({"Error": "Authentication error, user not retrieved"})
     return jsonify({"Message": "User successfully retrieved!",
                     "User": dict(user)})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
