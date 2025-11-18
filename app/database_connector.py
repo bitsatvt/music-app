@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, MetaData, Table, insert, select, delete, u
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 load_dotenv()
@@ -17,6 +18,7 @@ DATABASE_URL = f"mysql+mysqlconnector://{db_config['user']}:{db_config['password
 
 engine = create_engine(DATABASE_URL, echo=False)
 metadata = MetaData()
+hash_method = os.getenv("PASSWORD_HASH_METHOD")
 
 users_table = Table("users", metadata, autoload_with=engine)
 
@@ -26,10 +28,11 @@ def get_session():
 def sign_up(user, password, email):
     session = get_session()
     try:
-        query = insert(users_table).values(username=user, password_hash=password, email=email)
-        session.execute(query)
+        query = insert(users_table).values(username=user, password_hash=generate_password_hash(password, method=hash_method), email=email)
+        result = session.execute(query)
         session.commit()
-        return get_user(user, password)
+        user_id = result.lastrowid
+        return get_user_by_id(user_id)
     except IntegrityError:
         session.rollback()
         return None
@@ -39,9 +42,13 @@ def sign_up(user, password, email):
 def get_user(user, password):
     session = get_session()
     try:
-        query = select(users_table).where(users_table.c.username == user, users_table.c.password_hash == password)
+        query = select(users_table).where(users_table.c.username == user)
         result = session.execute(query).mappings().fetchone()
-        return result if result else None
+        if not result:
+            return None
+        if not check_password_hash(result["password_hash"], password):
+            return None
+        return result
     finally:
         session.close()
 
@@ -54,20 +61,28 @@ def get_user_by_id(user_id):
     finally:
         session.close()
 
-def delete_user(user, password):
+def delete_user(user_id, password):
     session = get_session()
     try:
-        query = delete(users_table).where(users_table.c.username == user, users_table.c.password_hash == password)
-        result = session.execute(query)
+        select_query = select(users_table).where(users_table.c.user_id == user_id)
+        user = session.execute(select_query).mappings().fetchone()
+        
+        if not user:
+            return False
+        if not check_password_hash(user["password_hash"], password):
+            return False
+        
+        delete_query = delete(users_table).where(users_table.c.user_id == user["user_id"])
+        result = session.execute(delete_query)
         session.commit()
         return result.rowcount > 0
     finally:
         session.close()
 
-def update_username(old_user, new_user):
+def update_username(user_id, new_user):
     session = get_session()
     try:
-        query = update(users_table).where(users_table.c.username == old_user).values(username=new_user)
+        query = update(users_table).where(users_table.c.user_id == user_id).values(username=new_user)
         result = session.execute(query)
         if result.rowcount == 0:
             session.rollback()
@@ -80,11 +95,19 @@ def update_username(old_user, new_user):
     finally:
         session.close()
 
-def update_password(username, old_password, new_password):
+def update_password(user_id, old_password, new_password):
     session = get_session()
     try:
-        query = update(users_table).where(users_table.c.username == username, users_table.c.password_hash == old_password).values(password_hash=new_password)
-        result = session.execute(query)
+        select_query = select(users_table).where(users_table.c.user_id == user_id)
+        user = session.execute(select_query).mappings().fetchone()
+
+        if not user:
+            return False
+        if not check_password_hash(user["password_hash"], old_password):
+            return False
+
+        update_query = update(users_table).where(users_table.c.user_id == user["user_id"]).values(password_hash=generate_password_hash(new_password, method=hash_method))
+        result = session.execute(update_query)
         session.commit()
         return result.rowcount > 0
     except Exception:
@@ -98,6 +121,8 @@ def get_all_users():
     try:
         query = select(users_table)
         result = session.execute(query).mappings().all()
-        return result if result else None
+        return result
+    except Exception as e:
+        return []
     finally:
         session.close()

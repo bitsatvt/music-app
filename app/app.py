@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, request, jsonify
 from database_connector import *
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -9,6 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 jwt = JWTManager(app)
 
 '''
@@ -18,11 +20,18 @@ jwt = JWTManager(app)
 @app.post('/signup')
 def signup():
     data = request.json
-    success = sign_up(data["username"], data["password"], data["email"])
-    if not success:
+    new_user = sign_up(data["username"], data["password"], data["email"])
+    if not new_user:
         return jsonify({"Error": "Sign Up Failed, Username or email already exists"}), 400
+    
+    access_token = create_access_token(identity=str(new_user["user_id"]))
+
     return jsonify({"Message": "Account creation successful!",
-                    "User": dict(success)}), 201
+                    "User": {
+                        "user_id": new_user["user_id"],
+                        "username": new_user["username"]
+                    },
+                    "Token": access_token}), 201
 
 '''
     Endpoint for logging into the application, returns a user 
@@ -36,22 +45,27 @@ def login():
     if not user:
         return jsonify({"Error": "Invalid username or password"}), 401
     
-    access_token = create_access_token(identity=str(user.user_id))
+    access_token = create_access_token(identity=str(user["user_id"]))
 
     return jsonify({"Message": "Login Successful!", 
-                    "User": dict(user),
+                    "User": {
+                        "user_id": user["user_id"],
+                        "username": user["username"]
+                    },
                     "Token": access_token}), 200
 
 '''
     Endpoint for deleting a user from the database, returns the messsage 
     for deletion status
 '''
-@app.post('/delete_user')
+@app.delete('/delete_user')
+@jwt_required()
 def delete():
     data = request.json
-    success = delete_user(data["username"], data["password"])
+    user_id = get_jwt_identity()
+    success = delete_user(user_id, data["password"])
     if not success:
-        return jsonify({"Error": "Delete Failed, user does not exist"}), 404
+        return jsonify({"Error": "Delete Failed"}), 401
     return jsonify({"Message": "Account delete successful!"}), 200
 
 '''
@@ -59,9 +73,11 @@ def delete():
     update was successful or not.
 '''
 @app.post('/update_username')
+@jwt_required()
 def update_user():
     data = request.json
-    status = update_username(data["old_user"], data["new_user"])
+    user_id = get_jwt_identity()
+    status = update_username(user_id, data["new_user"])
 
     if status == "user_not_found":
         return jsonify({"Error": "The user cannot be found"}), 404
@@ -74,9 +90,11 @@ def update_user():
     update was successful or not.
 '''
 @app.post('/update_password')
+@jwt_required()
 def update_pass():
     data = request.json
-    success = update_password(data["username"], data["old_password"], data["new_password"])
+    user_id = get_jwt_identity()
+    success = update_password(user_id, data["old_password"], data["new_password"])
     if not success:
         return jsonify({"Error": "Password update failed"}), 400
     return jsonify({"Message": "Password update successful!"}), 200
@@ -86,13 +104,13 @@ def update_pass():
     was successful.
 '''
 @app.get('/get_users')
+@jwt_required()
 def get_users():
-    data = request.json
     users = get_all_users()
     if not users:
         return jsonify({"Error": "Error fetching all users."}), 400
     return jsonify({"Message": "Successful retrieval of users!",
-                    "Users": [dict(user) for user in users]}), 200
+                    "Users": [{"username": user["username"], "user_id": user["user_id"]} for user in users]}), 200
 
 '''
     Endpoint for retrieving the user based on the token passed in, returns 
