@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from models import db, User, ScoreBoard
+from sqlalchemy import func
 
 app = Flask(__name__)
 
@@ -10,28 +9,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:hung25032007@localhost/music_app_db'
 app.config['SECRET_KEY'] = 'supersecretkeymusicapp'
 
-# JWT config
-app.config["JWT_SECRET_KEY"] = "super-secret-jwt-key-for-music-app"
-
-db = SQLAlchemy(app)
-jwt = JWTManager(app)
-
-class User(db.Model):
-    __tablename__   = "users"
-    user_id         = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    username        = db.Column(db.String(50), nullable=False)
-    password_hash   = db.Column(db.String(255), nullable=False)
-    email           = db.Column(db.String(100), nullable=False, unique=True)
-    creation_date   = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"User(id = {self.user_id}, name = {self.username}, email = {self.email})"
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+# Initualize db with this app
+db.init_app(app)
 
 
 # Main page
@@ -39,90 +18,135 @@ class User(db.Model):
 def home():
     return jsonify({"status": "ok"}) # Health check
 
-# Register: expects JSON { "username": "...", "email": "...", "password": "..." }
-# Implement token 
-@app.route("/api/register", methods=["POST"])
-def register():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Missing JSON body"}), 400
+# Get all scores in a formatted json string
+@app.route('/api/scoreboard', methods=["GET"])
+def get_scoreboard():
+    # Get the scoreboard
+    query = ScoreBoard.query
 
-    username = data.get("username")
-    password = data.get("password")
-    email = data.get("email")
+    # Json should pass in user_id and quiz_id
+    user_id = request.args.get('user_id', type=int)
+    quiz_id = request.args.get('quiz_id', type=int)
 
-    if not username or not email or not password:
-        return jsonify({"error": "Username, email, and password required"}), 400
+    # Both are required
+    if user_id is not None:
+        query = query.filter_by(user_id=user_id)
+    if quiz_id is not None:
+        query = query.filter_by(quiz_id=quiz_id)
 
-    user = User.query.filter_by(email=email).first()
-    # Check if the user email already existed
-    if user:
-        return jsonify({"error": "User with this email already exists"}), 409
-    else:
-        # Create a new user
-        user = User(username=username, email=email)
-        user.set_password(password) # password_hash is set here 
-        db.session.add(user)
-        db.session.commit()
-        
-        return jsonify({
-            "message": "User registered",
-            "user": {
-                "user_id": user.user_id,
-                "username": user.username,
-                "email": user.email,
-            },
-        }), 201
-    
+    rows = query.all()
 
-# Login
-@app.route("/api/login", methods=["POST"])
-def login():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Missing JSON body"}), 400
-    
-    # Collect info from the json
-    email = data.get("email")
-    password = data.get("password")
-
-    if not email or not password:
-        return jsonify({"error": "Email and password are required"}), 400
-
-    user = User.query.filter_by(email=email).first()
-    
-    if not user or not user.check_password(password):
-        return jsonify({"error": "Invalid email or password"}), 401
-
-    # Create a new token
-    # identity must be a string 
-    access_token = create_access_token(identity=str(user.user_id))
-
-    return jsonify({
-        "message": "Login successful",
-        "access_token": access_token,
-        "user": {
-            "user_id": user.user_id,
-            "username": user.username,
-            "email": user.email,
+    data = [
+        {
+            "quiz_id": row.quiz_id,
+            "user_id": row.user_id,
+            "score": row.score,
         }
-    }), 200
-
-
-# Dashboard
-@app.route("/api/me", methods=["GET"])
-@jwt_required()
-def me():
-    # We want the id to be an integer
-    current_user_id = int(get_jwt_identity())
-    user = User.query.get(current_user_id)
-    if not user:
-        return jsonify({"error": "User not found"}), 404
+        for row in rows
+    ]
 
     return jsonify({
-        "user_id": user.user_id,
-        "username": user.username,
-        "email": user.email,
+        "count": len(data),
+        "results":data,
+    })
+
+# Add a new attempt
+@app.route('/api/scoreboard', methods=['POST'])
+def add_score():
+    """
+    Expected JSON body:
+    {
+        "quiz_id": 1,
+        "user_id": 42,
+        "score": 95
+    }
+    """
+    data = request.get_json() or {}
+
+    quiz_id = data.get("quiz_id")
+    user_id = data.get("user_id")
+    score = data.get("score")
+
+    # Basic value check
+    if quiz_id is None or user_id is None or score is None:
+        return jsonify({
+            "error": "quiz_id, user_id, and score are required"
+        }), 400
+    
+    # Case to int and catch errors
+    try:
+        quiz_id = int(quiz_id)
+        user_id = int(user_id)
+        score = int(score)
+    except ValueError:
+        return jsonify({"error": "quiz_id, user_id, and score must be integers"}), 400
+    
+    new_row = ScoreBoard(
+        quiz_id=quiz_id,
+        user_id=user_id,
+        score=score
+    )
+
+    db.session.add(new_row)
+    db.session.commit()
+
+    return jsonify({
+        "quiz_id": quiz_id,
+        "user_id": user_id,
+        "score": score,
+        "status": "saved successfully"
+    }), 201
+
+# Get average points of specific user of specific quiz
+def get_user_quiz_average(user_id: int, quiz_id: int):
+    """Return (average_score) for this user and quiz"""
+    avg_score = (
+        db.session.query(func.avg(ScoreBoard.score))
+        .filter(
+            ScoreBoard.user_id == user_id,
+            ScoreBoard.quiz_id == quiz_id
+        )
+        .scalar()
+    )
+    
+    return avg_score
+
+@app.route('/api/scoreboard/average', methods=["GET"])
+def get_average_score():
+    data = request.get_json() or {}
+
+    user_id = data.get('user_id')
+    quiz_id = data.get('quiz_id')
+
+    try:
+        user_id = int(user_id)
+        quiz_id = int(quiz_id)
+    except ValueError:
+        return jsonify({
+            "error": "user_id and quiz_id are integers"
+        })
+
+    if user_id is None or quiz_id is None:
+        return jsonify({
+            "error": "user_id and quiz_id are required"
+        }), 400
+    
+    avg_score = get_user_quiz_average(user_id=user_id, quiz_id=quiz_id)
+
+    if avg_score is None:
+        return jsonify({
+            "user_id": user_id,
+            "quiz_id": quiz_id,
+            "average_score": None,
+            "message": "No attempts found for this user and quiz"
+        }), 200
+    
+    avg_score_rounded = round(float(avg_score), 2)
+
+    return jsonify({
+        "user_id": user_id,
+        "quiz_id": quiz_id,
+        "average_score": avg_score_rounded
     }), 200
 
 if __name__ == '__main__':
