@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gliss",
+  title: "MusIQ",
   description: "An app to help you learn music theory and literacy.",
 };
 

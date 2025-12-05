@@ -142,5 +142,5 @@ export default function LoginCard() {
 
       </Card>
     </>
-  )
+  );
 }
