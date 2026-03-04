@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import and_
 import os
 
 load_dotenv()
@@ -22,6 +23,7 @@ hash_method = os.getenv("PASSWORD_HASH_METHOD")
 
 users_table = Table("users", metadata, autoload_with=engine)
 
+friends_table = Table("friends", metadata, autoload_with=engine)
 
 def get_session():
     return Session(engine)
@@ -138,5 +140,18 @@ def get_all_users():
         return result
     except Exception as e:
         return []
+    finally:
+        session.close()
+
+def add_friend(user_id, friend_id):
+    session = get_session()
+    try:
+        query = insert(friends_table.values(user_id=user_id, friend_id=friend_id))
+        session.execute(query)
+        session.commit()
+        return True
+    except IntegrityError:
+        session.rollback()
+        return False
     finally:
         session.close()
