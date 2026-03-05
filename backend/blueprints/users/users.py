@@ -125,4 +125,5 @@ def profile():
     if not user:
         return jsonify({"Error": "Authentication error, user not retrieved"})
     return jsonify({"Message": "User successfully retrieved!",
-                    "User": {dict(user)}})
+                    "User": dict(user)})
+
