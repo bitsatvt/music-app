@@ -1,7 +1,7 @@
 USE music_app_db;
-DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `friends`;
 DROP TABLE IF EXISTS `friend_requests`;
+DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
   `user_id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -19,10 +19,12 @@ CREATE TABLE `users` (
 --
 
 CREATE TABLE `friends` (
+  `friendship_id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned NOT NULL,
   `friend_id` bigint unsigned NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`,`friend_id`),
+  PRIMARY KEY (`friendship_id`),
+  UNIQUE KEY `unique_friendship` (`user_id`, `friend_id`),
   KEY `fk_friends_friend` (`friend_id`),
   CONSTRAINT `fk_friends_friend` FOREIGN KEY (`friend_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_friends_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
@@ -34,10 +36,12 @@ CREATE TABLE `friends` (
 --
 
 CREATE TABLE `friend_requests` (
+  `request_id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `requester_id` bigint unsigned NOT NULL,
   `receiver_id` bigint unsigned NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`requester_id`,`receiver_id`),
+  PRIMARY KEY (`request_id`),
+  UNIQUE KEY `unique_request` (`requester_id`, `receiver_id`),
   KEY `fk_fr_receiver` (`receiver_id`),
   CONSTRAINT `fk_fr_receiver` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_fr_requester` FOREIGN KEY (`requester_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE

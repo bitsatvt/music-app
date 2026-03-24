@@ -142,16 +142,3 @@ def get_all_users():
         return []
     finally:
         session.close()
-
-def add_friend(user_id, friend_id):
-    session = get_session()
-    try:
-        query = insert(friends_table.values(user_id=user_id, friend_id=friend_id))
-        session.execute(query)
-        session.commit()
-        return True
-    except IntegrityError:
-        session.rollback()
-        return False
-    finally:
-        session.close()
