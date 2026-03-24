@@ -127,3 +127,20 @@ def profile():
     return jsonify({"Message": "User successfully retrieved!",
                     "User": dict(user)})
 
+'''
+    Endpoint for adding a frined --> broken because doesn't account for friend requests, will change
+'''
+'''@users.post("/friends")
+@jwt_required()
+def add_friend():
+    data = request.json
+    user_id = get_jwt_identity()
+    friend_id = data["friend_id"]
+
+    if friend_id == user_id:
+        return jsonify({"Error": "Cannot add yourself as a friend"}), 400
+
+    success = add_friend_db(user_id, friend_id)
+    if not success:
+        return jsonify({"Error": "Failed to add friend, check if friend id is valid or if already friends"}), 400
+    return jsonify({"Message": "Friend added successfully!"}), 200'''
