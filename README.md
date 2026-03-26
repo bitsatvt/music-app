@@ -1,4 +1,4 @@
-# music-app
+# MusIQ
 A music learning platform that uses quiz games and audio tools to make music education more accessible and engaging.
 
 # How to use this app
