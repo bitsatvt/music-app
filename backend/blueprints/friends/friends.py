@@ -57,3 +57,116 @@ def decline_request():
     if not success:
         return jsonify({"Error": "Failed to decline friend request, request may not exist"}), 400
     return jsonify({"Message": "Friend request declined!"}), 200
+
+'''
+    Endpoint for cancelling an outgoing friend request.
+    Returns 200 on success, 404 if the request does not exist,
+    500 on a database error.
+'''
+@friends.delete('/cancel_request')
+@jwt_required()
+def cancel_request():
+    data = request.json
+    requester_id = get_jwt_identity()
+    receiver_id = data["receiver_id"]
+ 
+    result = cancel_friend_request(requester_id, receiver_id)
+ 
+    if result is None:
+        return jsonify({"Error": "Failed to cancel friend request"}), 500
+    if not result:
+        return jsonify({"Error": "Friend request not found"}), 404
+    return jsonify({"Message": "Friend request cancelled successfully!"}), 200
+
+'''
+    Endpoint for unfriending a user,
+    returns a msg stating whether the unfriend was successful
+    Returns 200 on success, 404 if the friendship does not exist,
+    500 on DB error
+'''
+@friends.delete('/remove_friend')
+@jwt_required()
+def remove_friend_endpoint():
+    data = request.json
+    user_id = get_jwt_identity()
+    friend_id = data["friend_id"]
+ 
+    if str(user_id) == str(friend_id):
+        return jsonify({"Error": "Invalid request"}), 400
+ 
+    result = remove_friend(user_id, friend_id)
+ 
+    if result is None:
+        return jsonify({"Error": "Failed to remove friend"}), 500
+    if not result:
+        return jsonify({"Error": "Friendship not found"}), 404
+    return jsonify({"Message": "Friend removed successfully!"}), 200
+
+'''
+    Endpoint for retrieving the current user's pending friend requests.
+    Returns incoming (others -> user) and outgoing (user -> others) separately.
+    Returns 200 with empty lists if there are no pending requests,
+    500 on a database error.
+'''
+@friends.get('/pending_requests')
+@jwt_required()
+def pending_requests():
+    user_id = get_jwt_identity()
+    requests = get_pending_requests(user_id)
+ 
+    if requests is None:
+        return jsonify({"Error": "Failed to retrieve pending friend requests"}), 500
+ 
+    incoming = requests["incoming"]
+    outgoing = requests["outgoing"]
+ 
+    if len(incoming) == 0 and len(outgoing) == 0:
+        return jsonify({"Message": "No pending friend requests", "Requests": {"incoming": [], "outgoing": []}}), 200
+ 
+    return jsonify({
+        "Message": "Pending friend requests retrieved successfully!",
+        "Requests": {
+            "incoming": [{"user_id": req["user_id"], "username": req["username"]} for req in incoming],
+            "outgoing": [{"user_id": req["user_id"], "username": req["username"]} for req in outgoing]
+        }
+    }), 200
+
+'''
+    Endpoint for retrieving the current user's friends list.
+    Returns 200 with an empty list if the user has no friends,
+    500 on a database error.
+'''
+@friends.get('/friends_list')
+@jwt_required()
+def friends_list():
+    user_id = get_jwt_identity()
+    friends = get_friends_list(user_id)
+ 
+    if friends is None:
+        return jsonify({"Error": "Failed to retrieve friends list"}), 500
+    if len(friends) == 0:
+        return jsonify({"Message": "User has no friends yet", "Friends": []}), 200
+ 
+    return jsonify({
+        "Message": "Friends list retrieved successfully!",
+        "Friends": [{"user_id": friend["user_id"], "username": friend["username"]} for friend in friends]
+    }), 200
+ 
+'''
+    Endpoint for checking the relationship status between the logged in user
+    and another user. Returns one of: friends, request_sent, request_received, none.
+    500 on a database error.
+'''
+@friends.get('/friend_status/<int:other_id>')
+@jwt_required()
+def friend_status(other_id):
+    user_id = get_jwt_identity()
+ 
+    if user_id == str(other_id):
+        return jsonify({"Error": "Invalid request"}), 400
+ 
+    status = get_friend_status(user_id, other_id)
+ 
+    if status is None:
+        return jsonify({"Error": "Failed to retrieve friend status"}), 500
+    return jsonify({"Message": "Friend status retrieved successfully!", "Status": status}), 200
