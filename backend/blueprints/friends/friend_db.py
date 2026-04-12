@@ -5,8 +5,6 @@ from sqlalchemy import and_, or_
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
 db_config = {
     'user': os.getenv("DB_USER"),
     'password': os.getenv("DB_PASSWORD"),
@@ -207,10 +205,10 @@ def get_friends_list(user_id):
         session.close()
 
 '''
-Returns incoming and outgoing pending friend requests for the given user.
+Returns incoming pending friend requests for the given user.
 Returns None on DB error, dicts with empty lists if no requests.
 '''
-def get_pending_requests(user_id):
+def get_incoming_pending_requests(user_id):
     session = get_session()
     try:
         incoming = session.execute(
@@ -223,7 +221,21 @@ def get_pending_requests(user_id):
                 users_table.c.user_id == friend_requests_table.c.requester_id
             ).where(friend_requests_table.c.receiver_id == user_id)
         ).mappings().all()
- 
+        return {
+            "incoming": [dict(row) for row in incoming]
+        }
+    except Exception:
+        return None
+    finally:
+        session.close()
+
+'''
+Returns outgoing pending friend requests for the given user.
+Returns None on DB error, dicts with empty lists if no requests.
+'''
+def get_outgoing_pending_requests(user_id):
+    session = get_session()
+    try:
         outgoing = session.execute(
             select(
                 users_table.c.user_id,
@@ -236,7 +248,6 @@ def get_pending_requests(user_id):
         ).mappings().all()
  
         return {
-            "incoming": [dict(row) for row in incoming],
             "outgoing": [dict(row) for row in outgoing]
         }
     except Exception:

@@ -3,7 +3,11 @@ from blueprints.users.users import users
 from blueprints.friends.friends import friends
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
+from dotenv import load_dotenv
 import os
+
+# Simply for testing purposes
+load_dotenv()
 
 app = Flask(__name__)
 

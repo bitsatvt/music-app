@@ -3,8 +3,6 @@ from .friend_db import *
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from dotenv import load_dotenv
 
-load_dotenv()
-
 friends = Blueprint("friends", __name__)
 
 '''
@@ -15,15 +13,18 @@ friends = Blueprint("friends", __name__)
 @jwt_required()
 def send_request():
     data = request.json
+    if not data or "receiver_id" not in data:
+        return jsonify({"Error": "Request body is missing or invalid"}), 400
+
     requester_id = get_jwt_identity()
     receiver_id = data["receiver_id"]
 
-    if requester_id == receiver_id:
+    if int(requester_id) == int(receiver_id):
         return jsonify({"Error": "You cannot send a friend request to yourself"}), 400
 
     success = send_friend_request(requester_id, receiver_id)
     if not success:
-        return jsonify({"Error": "Failed to send friend request, request may already exist"}), 400
+        return jsonify({"Error": "Failed to send friend request, request may already exist or the user may not exist"}), 400
     return jsonify({"Message": "Friend request sent sucessfully!"}), 201
 
 '''
@@ -91,8 +92,8 @@ def remove_friend_endpoint():
     user_id = get_jwt_identity()
     friend_id = data["friend_id"]
  
-    if str(user_id) == str(friend_id):
-        return jsonify({"Error": "Invalid request"}), 400
+    if int(user_id) == int(friend_id):
+        return jsonify({"Error": "user_id shouldn't equal friend_id; there's a bug in the code"}), 400
  
     result = remove_friend(user_id, friend_id)
  
@@ -102,32 +103,58 @@ def remove_friend_endpoint():
         return jsonify({"Error": "Friendship not found"}), 404
     return jsonify({"Message": "Friend removed successfully!"}), 200
 
+
 '''
-    Endpoint for retrieving the current user's pending friend requests.
-    Returns incoming (others -> user) and outgoing (user -> others) separately.
+    Endpoint for retrieving the current user's outgoing pending friend requests.
+    Returns outgoing (user -> others)
     Returns 200 with empty lists if there are no pending requests,
     500 on a database error.
 '''
-@friends.get('/pending_requests')
+@friends.get('/outgoing_pending_requests')
 @jwt_required()
-def pending_requests():
+def outgoing_pending_requests():
     user_id = get_jwt_identity()
-    requests = get_pending_requests(user_id)
+    requests = get_outgoing_pending_requests(user_id)
+ 
+    if requests is None:
+        return jsonify({"Error": "Failed to retrieve pending friend requests"}), 500
+ 
+    outgoing = requests["outgoing"]
+ 
+    if len(outgoing) == 0:
+        return jsonify({"Message": "No outgoing friend requests", "Requests": {"outgoing": []}}), 200
+ 
+    return jsonify({
+        "Message": "Pending friend requests retrieved successfully!",
+        "Requests": {
+            "outgoing": [{"user_id": req["user_id"], "username": req["username"]} for req in outgoing]
+        }
+    }), 200
+
+'''
+    Endpoint for retrieving the current user's incoming pending friend requests.
+    Returns incoming (others -> user)
+    Returns 200 with empty lists if there are no pending requests,
+    500 on a database error.
+'''
+@friends.get('/incoming_pending_requests')
+@jwt_required()
+def incoming_pending_request():
+    user_id = get_jwt_identity()
+    requests = get_incoming_pending_requests(user_id)
  
     if requests is None:
         return jsonify({"Error": "Failed to retrieve pending friend requests"}), 500
  
     incoming = requests["incoming"]
-    outgoing = requests["outgoing"]
  
-    if len(incoming) == 0 and len(outgoing) == 0:
-        return jsonify({"Message": "No pending friend requests", "Requests": {"incoming": [], "outgoing": []}}), 200
+    if len(incoming) == 0:
+        return jsonify({"Message": "No pending friend requests", "Requests": {"incoming": []}}), 200
  
     return jsonify({
         "Message": "Pending friend requests retrieved successfully!",
         "Requests": {
-            "incoming": [{"user_id": req["user_id"], "username": req["username"]} for req in incoming],
-            "outgoing": [{"user_id": req["user_id"], "username": req["username"]} for req in outgoing]
+            "incoming": [{"user_id": req["user_id"], "username": req["username"]} for req in incoming]
         }
     }), 200
 
@@ -162,7 +189,7 @@ def friends_list():
 def friend_status(other_id):
     user_id = get_jwt_identity()
  
-    if user_id == str(other_id):
+    if int(user_id) == int(other_id):
         return jsonify({"Error": "Invalid request"}), 400
  
     status = get_friend_status(user_id, other_id)
