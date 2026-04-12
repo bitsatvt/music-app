@@ -61,9 +61,7 @@ export default function LoginCard() {
 
   return (
     <>
-      <Card className="w-full max-w-sm">
-
-        {/* Header */}
+      <Card className="w-full max-w-sm bg-white/70 border-[#8CA0D7]/40 dark:bg-[#0f0f14] dark:border-[#9D79BC]/20">
         <CardHeader>
           <CardTitle>
             Log in to your account
@@ -93,6 +91,7 @@ export default function LoginCard() {
                   type="text"
                   placeholder="musiclover123"
                   value={username}
+                  className="border-[#8CA0D7]/40 dark:border-[#9D79BC]/20"
                   onChange={(event) => setUsername(event.target.value)}
                   required
                 />
@@ -115,6 +114,7 @@ export default function LoginCard() {
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
+                  className="border-[#8CA0D7]/40 dark:border-[#9D79BC]/20"
                   required
                 />
               </div>
@@ -124,22 +124,20 @@ export default function LoginCard() {
               ) : null}
 
             </div>
+         
 
             {/* Footer */}
-            <CardFooter className="flex-col gap-2 px-0 pt-6">
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Logging in..." : "Login"}
+            <CardFooter className="flex-col gap-2">
+              <Button type="submit" className="w-full bg-[#9D79BC] text-white hover:bg-[#8a68a8] dark:bg-[#9D79BC] dark:text-[#0a0a0f] dark:hover:bg-[#b08fd0]" disabled={isSubmitting}>
+                Login
               </Button>
 
-              <p> or </p>
-
-              <Button variant="outline" className="w-full" type="button">
+              <Button variant="outline" className="w-full border-[#8CA0D7]/40 text-[#9D79BC] hover:bg-[#9D79BC]/5 dark:border-[#9D79BC]/20 dark:text-[#c9a2e0] dark:hover:bg-[#9D79BC]/10" type="button">
                 Continue as Guest
               </Button>
             </CardFooter>
-          </form>
+           </form>
         </CardContent>
-
       </Card>
     </>
   );
