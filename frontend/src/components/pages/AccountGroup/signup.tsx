@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -10,9 +12,65 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import Link from "next/link"
 
-export default function LoginCard() {
+export default function SignupCard() {
+  const router = useRouter()
+  const apiBaseUrl = "http://localhost:5000"
+
+  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setErrorMessage("")
+    setSuccessMessage("")
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.")
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/users/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      })
+
+      const payload = await response.json()
+
+      if (!response.ok) {
+        setErrorMessage(payload.Error ?? "Sign up failed.")
+        return
+      }
+
+      if (payload.Token) {
+        localStorage.setItem("authToken", payload.Token)
+      }
+
+      setSuccessMessage(payload.Message ?? "Account created successfully.")
+      router.push("/dashboard")
+    } 
+    catch {
+      setErrorMessage("Unable to reach the sign up service.")
+    } 
+    finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
       <Card className="w-full max-w-sm">
@@ -25,7 +83,7 @@ export default function LoginCard() {
           </CardTitle>
             
           <CardDescription>
-            Create your account with your email username and a password.
+            Create your account with a username, email, and password.
           </CardDescription>
             
           <CardAction>
@@ -38,8 +96,21 @@ export default function LoginCard() {
 
         {/* Content */}
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
+
+              {/* Username Input */}
+              <div className="grid gap-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="musiclover123"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  required
+                />
+              </div>
                 
               {/* Email Input */}
               <div className="grid gap-2">
@@ -48,6 +119,8 @@ export default function LoginCard() {
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   required
                 />
               </div>
@@ -59,25 +132,49 @@ export default function LoginCard() {
                   <Label htmlFor="password">New Password</Label>
                 </div>
 
-                <Input id="password" type="password" placeholder="Create a password" required />
-                <Input id="password" type="password" placeholder="Confirm your password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Create a password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                />
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  required
+                />
 
               </div>
 
+              {errorMessage ? (
+                <p className="text-sm text-red-500">{errorMessage}</p>
+              ) : null}
+
+              {successMessage ? (
+                <p className="text-sm text-green-600">{successMessage}</p>
+              ) : null}
+
             </div>
+            
+            {/* Footer */}
+            <CardFooter className="flex-col gap-2 px-0 pt-6">
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Creating account..." : "Create account"}
+              </Button>
+
+              <p> or </p>
+
+              <Button variant="outline" className="w-full" type="button">
+                Continue as Guest
+              </Button>
+            </CardFooter>
           </form>
         </CardContent>
-
-        {/* Footer */}
-        <CardFooter className="flex-col gap-2">
-
-          <Button type="submit" className="w-full">Create account</Button>
-            
-            <p> or </p>
-
-          <Button variant="outline" className="w-full">Continue as Guest</Button>
-
-        </CardFooter>
 
       </Card>
     </>
