@@ -6,7 +6,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 import os
 
-# Simply for testing purposes
+# Simply for dev purposes
 load_dotenv()
 
 app = Flask(__name__)

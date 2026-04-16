@@ -1,9 +1,6 @@
 from flask import Blueprint, request, jsonify
 from .user_db import *
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from dotenv import load_dotenv
-
-load_dotenv()
 
 users = Blueprint("users", __name__)
 
