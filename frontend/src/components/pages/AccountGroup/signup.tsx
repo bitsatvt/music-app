@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import Link from "next/link"
+import { setAuthSession } from "@/lib/auth"
 
 export default function SignupCard() {
   const router = useRouter()
@@ -57,7 +58,7 @@ export default function SignupCard() {
       }
 
       if (payload.Token) {
-        localStorage.setItem("authToken", payload.Token)
+        setAuthSession(payload.Token, payload.User)
       }
 
       setSuccessMessage(payload.Message ?? "Account created successfully.")
