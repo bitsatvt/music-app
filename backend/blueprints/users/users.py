@@ -1,9 +1,6 @@
 from flask import Blueprint, request, jsonify
 from .user_db import *
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from dotenv import load_dotenv
-
-load_dotenv()
 
 users = Blueprint("users", __name__)
 
@@ -125,4 +122,4 @@ def profile():
     if not user:
         return jsonify({"Error": "Authentication error, user not retrieved"})
     return jsonify({"Message": "User successfully retrieved!",
-                    "User": {dict(user)}})
+                    "User": dict(user)})

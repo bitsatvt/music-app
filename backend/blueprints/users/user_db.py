@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
+from sqlalchemy import and_
 
 load_dotenv()
 
@@ -22,6 +22,7 @@ hash_method = os.getenv("PASSWORD_HASH_METHOD")
 
 users_table = Table("users", metadata, autoload_with=engine)
 
+friends_table = Table("friends", metadata, autoload_with=engine)
 
 def get_session():
     return Session(engine)
