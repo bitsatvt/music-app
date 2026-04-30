@@ -26,11 +26,11 @@ const navItems = [
     enabled: true,
   },
   {
-    href: "",
+    href: "/quizzes",
     icon: FileMusic,
     label: "Quizzes",
-    description: "Coming soon",
-    enabled: false,
+    description: "Practice modes",
+    enabled: true,
   },
   {
     href: "",
@@ -47,11 +47,11 @@ const navItems = [
     enabled: false,
   },
   {
-    href: "",
+    href: "/profile",
     icon: User,
     label: "Profile",
-    description: "Coming soon",
-    enabled: false,
+    description: "Your progress",
+    enabled: true,
   },
   {
     href: "",
@@ -81,7 +81,10 @@ export function DashboardNavigation() {
         <nav className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = item.enabled && pathname === item.href
+            const isActive =
+              item.enabled &&
+              (pathname === item.href ||
+                (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`)))
 
             if (!item.enabled) {
               return (

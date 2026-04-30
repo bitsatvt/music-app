@@ -28,7 +28,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 
 const stats = [
   {
@@ -113,22 +112,24 @@ export default function DashboardPage() {
             <CardContent className="flex h-full flex-col justify-between p-6">
               <div>
                 <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-white/70">
-                  This week
+                  Friends
                 </p>
-                <h2 className="mb-3 text-2xl font-semibold">Keep your streak alive.</h2>
-                <p className="max-w-sm text-sm text-white/80">
-                  You are one strong session away from extending your best run and climbing the leaderboard again.
-                </p>
+                <h2 className="mb-3 text-2xl font-semibold">Friends activity</h2>
+                <p className="max-w-sm text-sm text-white/80">See who is active and competing with you.</p>
               </div>
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-white/12 p-4">
-                  <p className="text-sm text-white/75">Sessions done</p>
-                  <p className="mt-2 text-2xl font-semibold">12</p>
-                </div>
-                <div className="rounded-2xl bg-white/12 p-4">
-                  <p className="text-sm text-white/75">Goal progress</p>
-                  <p className="mt-2 text-2xl font-semibold">84%</p>
-                </div>
+              <div className="mt-6 space-y-3">
+                {topFriends.map((friend) => (
+                  <div key={friend.id} className="flex items-center justify-between rounded-2xl bg-white/12 p-4">
+                    <div>
+                      <p className="text-sm font-semibold">{friend.name}</p>
+                      <p className="text-xs text-white/75">Level {friend.level}</p>
+                    </div>
+                    <p className="text-sm font-semibold">{friend.totalScore.toLocaleString()}</p>
+                  </div>
+                ))}
+                <Button variant="secondary" className="w-full bg-white text-indigo-700 hover:bg-white/90">
+                  View all friends
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -158,9 +159,7 @@ export default function DashboardPage() {
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-2xl font-semibold">Featured quizzes</h2>
-              <p className="text-muted-foreground text-sm">
-                Two practice modes from the Figma concept, adapted into the live dashboard.
-              </p>
+              <p className="text-muted-foreground text-sm">Quick access to practice modes.</p>
             </div>
             <Button variant="ghost" asChild className="justify-start sm:justify-center">
               <Link href="/dashboard">
@@ -201,11 +200,6 @@ export default function DashboardPage() {
                 </div>
                 <CardContent className="p-6">
                   <p className="text-muted-foreground mb-5 text-sm leading-6">{feature.description}</p>
-                  <div className="mb-3 flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Your progress</span>
-                    <span className="font-medium">{feature.progress}%</span>
-                  </div>
-                  <Progress value={feature.progress} className="mb-5" />
                   <Button className="w-full">{feature.cta}</Button>
                 </CardContent>
               </Card>
