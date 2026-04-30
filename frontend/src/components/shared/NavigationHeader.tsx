@@ -1,11 +1,17 @@
-import { Home, Music, FileText, Trophy, Users, User, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+"use client"
 
-interface NavigationHeaderProps {
-  isDarkMode: boolean;
-}
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
+import { FileText, Home, Music, Settings, Trophy, User, Users } from "lucide-react"
 
-export function NavigationHeader({ isDarkMode }: NavigationHeaderProps) {
+import { Button } from "@/components/ui/button"
+
+export function NavigationHeader() {
+  const { resolvedTheme } = useTheme()
+  const pathname = usePathname()
+  const isDarkMode = resolvedTheme === "dark"
+
   return (
     <header className={`${isDarkMode ? 'bg-[#0f0f1e] border-gray-800' : 'bg-white border-gray-200'} border-b px-6 py-3`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -17,27 +23,66 @@ export function NavigationHeader({ isDarkMode }: NavigationHeaderProps) {
 
         {/* Navigation */}
         <nav className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
-            <Home className="size-4" />
-            Dashboard
+          <Button
+            asChild
+            variant={pathname === "/dashboard" ? "default" : "ghost"}
+            size="sm"
+            className={`gap-2 ${
+              pathname === "/dashboard"
+                ? "bg-purple-600 text-white hover:bg-purple-700"
+                : isDarkMode
+                  ? "text-gray-300 hover:text-white hover:bg-gray-800"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            }`}
+          >
+            <Link href="/dashboard">
+              <Home className="size-4" />
+              Dashboard
+            </Link>
           </Button>
-          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
-            <FileText className="size-4" />
-            Quizzes
+          <Button
+            asChild
+            variant={pathname.startsWith("/quizzes") ? "default" : "ghost"}
+            size="sm"
+            className={`gap-2 ${
+              pathname.startsWith("/quizzes")
+                ? "bg-purple-600 text-white hover:bg-purple-700"
+                : isDarkMode
+                  ? "text-gray-300 hover:text-white hover:bg-gray-800"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            }`}
+          >
+            <Link href="/quizzes">
+              <FileText className="size-4" />
+              Quizzes
+            </Link>
           </Button>
-          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
+          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} disabled>
             <Trophy className="size-4" />
             Leaderboard
           </Button>
-          <Button size="sm" className={`gap-2 ${isDarkMode ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-600 text-white hover:bg-purple-700'}`}>
+          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} disabled>
             <Users className="size-4" />
             Friends
           </Button>
-          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
-            <User className="size-4" />
-            Profile
+          <Button
+            asChild
+            variant={pathname.startsWith("/profile") ? "default" : "ghost"}
+            size="sm"
+            className={`gap-2 ${
+              pathname.startsWith("/profile")
+                ? "bg-purple-600 text-white hover:bg-purple-700"
+                : isDarkMode
+                  ? "text-gray-300 hover:text-white hover:bg-gray-800"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            }`}
+          >
+            <Link href="/profile">
+              <User className="size-4" />
+              Profile
+            </Link>
           </Button>
-          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
+          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} disabled>
             <Settings className="size-4" />
             Settings
           </Button>
