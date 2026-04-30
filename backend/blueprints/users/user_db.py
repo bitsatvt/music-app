@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import and_
+import os
 
 load_dotenv()
 

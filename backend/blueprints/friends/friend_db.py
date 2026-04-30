@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, MetaData, Table, insert, select, delete
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_, or_
+import os
 
 db_config = {
     'user': os.getenv("DB_USER"),
