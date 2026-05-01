@@ -2,14 +2,20 @@ from flask import Flask
 from blueprints.users.users import users
 from blueprints.friends.friends import friends
 from flask_jwt_extended import JWTManager
-from datetime import timedelta
+from flask_cors import CORS
 from dotenv import load_dotenv
+from datetime import timedelta
 import os
 
-# Simply for dev purposes
 load_dotenv()
 
 app = Flask(__name__)
+
+# allow frontend app to call backend auth endpoints during local development
+CORS(
+    app,
+    resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}},
+)
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)

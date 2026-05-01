@@ -1,16 +1,39 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
-import { FileText, Home, Music, Settings, Trophy, User, Users } from "lucide-react"
+import { FileText, Home, LogOut, Music, Settings, Trophy, User, Users } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { clearAuthSession, useAuthUser } from "@/lib/auth"
 
 export function NavigationHeader() {
   const { resolvedTheme } = useTheme()
   const pathname = usePathname()
-  const isDarkMode = resolvedTheme === "dark"
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+  const authUser = useAuthUser()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const isDarkMode = mounted && resolvedTheme === "dark"
+
+  function handleLogout() {
+    clearAuthSession()
+    router.push("/login")
+  }
 
   return (
     <header className={`${isDarkMode ? 'bg-[#0f0f1e] border-gray-800' : 'bg-white border-gray-200'} border-b px-6 py-3`}>
@@ -82,10 +105,33 @@ export function NavigationHeader() {
               Profile
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} disabled>
-            <Settings className="size-4" />
-            Settings
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
+              >
+                <Settings className="size-4" />
+                Settings
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {authUser ? (
+                <>
+                  <DropdownMenuLabel className="max-w-56">
+                    <p className="truncate font-medium">{authUser.username}</p>
+                    <p className="text-muted-foreground truncate text-xs">{authUser.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                </>
+              ) : null}
+              <DropdownMenuItem onClick={handleLogout} variant="destructive">
+                <LogOut className="size-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
       </div>
     </header>
