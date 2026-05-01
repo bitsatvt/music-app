@@ -20,7 +20,8 @@ def signup():
     return jsonify({"Message": "Account creation successful!",
                     "User": {
                         "user_id": new_user["user_id"],
-                        "username": new_user["username"]
+                        "username": new_user["username"],
+                        "email": new_user["email"]
                     },
                     "Token": access_token}), 201
 
@@ -42,7 +43,8 @@ def login():
     return jsonify({"Message": "Login Successful!",
                     "User": {
                         "user_id": user["user_id"],
-                        "username": user["username"]
+                        "username": user["username"],
+                        "email": user["email"]
                     },
                     "Token": access_token}), 200
 
@@ -121,5 +123,10 @@ def profile():
     user = get_user_by_id(user_id)
     if not user:
         return jsonify({"Error": "Authentication error, user not retrieved"})
+    safe_user = {
+        "user_id": user["user_id"],
+        "username": user["username"],
+        "email": user["email"],
+    }
     return jsonify({"Message": "User successfully retrieved!",
-                    "User": dict(user)})
+                    "User": safe_user})

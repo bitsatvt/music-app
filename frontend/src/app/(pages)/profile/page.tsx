@@ -1,3 +1,5 @@
+"use client"
+
 import { Award, Calendar, Target, TrendingUp, Trophy, User, Zap } from "lucide-react"
 
 import {
@@ -5,6 +7,7 @@ import {
   dashboardQuizHistory,
   dashboardUser,
 } from "@/components/pages/DashboardPage/data"
+import { useAuthUser } from "@/lib/auth"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,16 +31,25 @@ const achievements = [
   { id: "master", title: "Master Musician", status: "In progress" },
 ]
 
-const profileStats = [
-  { label: "Total Quizzes", value: dashboardUser.totalQuizzes.toString(), icon: Target, iconClassName: "text-fuchsia-500" },
-  { label: "Average Score", value: `${dashboardUser.averageScore}%`, icon: TrendingUp, iconClassName: "text-emerald-500" },
-  { label: "Best Streak", value: dashboardUser.bestStreak.toString(), icon: Zap, iconClassName: "text-amber-500" },
-  { label: "Leaderboard Rank", value: "#3", icon: Trophy, iconClassName: "text-sky-500" },
-]
-
 export default function ProfilePage() {
+  const authUser = useAuthUser()
+  const currentUser = authUser
+    ? {
+        ...dashboardUser,
+        id: authUser.user_id.toString(),
+      }
+    : dashboardUser
+  const displayName = authUser?.username ?? ""
+  const email = authUser?.email ?? ""
+  const avatarInitials = authUser ? getInitials(authUser.username) : ""
   const recent = dashboardQuizHistory.slice(0, 4)
   const me = dashboardLeaderboard.find((entry) => entry.isCurrentUser)
+  const profileStats = [
+    { label: "Total Quizzes", value: currentUser.totalQuizzes.toString(), icon: Target, iconClassName: "text-fuchsia-500" },
+    { label: "Average Score", value: `${currentUser.averageScore}%`, icon: TrendingUp, iconClassName: "text-emerald-500" },
+    { label: "Best Streak", value: currentUser.bestStreak.toString(), icon: Zap, iconClassName: "text-amber-500" },
+    { label: "Leaderboard Rank", value: "#3", icon: Trophy, iconClassName: "text-sky-500" },
+  ]
 
   return (
     <main className="flex-1">
@@ -54,14 +66,14 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-4">
                   <Avatar className="size-16 ring-4 ring-fuchsia-500/10">
                     <AvatarFallback className="bg-gradient-to-br from-fuchsia-500 to-violet-600 text-lg font-semibold text-white">
-                      {getInitials(dashboardUser.name)}
+                      {avatarInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-2xl font-semibold">{dashboardUser.name}</p>
-                    <p className="text-muted-foreground text-sm">{dashboardUser.email}</p>
+                    <p className="text-2xl font-semibold">{displayName}</p>
+                    <p className="text-muted-foreground text-sm">{email}</p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Badge className="bg-fuchsia-600 text-white hover:bg-fuchsia-600">Level {dashboardUser.level}</Badge>
+                      <Badge className="bg-fuchsia-600 text-white hover:bg-fuchsia-600">Level {currentUser.level}</Badge>
                       <Badge variant="outline" className="gap-1">
                         <Calendar className="size-3" />
                         Joined Apr 2026
@@ -72,15 +84,15 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   <div className="rounded-2xl bg-muted/45 p-4 text-center">
-                    <p className="text-xl font-semibold">{dashboardUser.totalQuizzes}</p>
+                    <p className="text-xl font-semibold">{currentUser.totalQuizzes}</p>
                     <p className="text-muted-foreground text-xs">Quizzes</p>
                   </div>
                   <div className="rounded-2xl bg-muted/45 p-4 text-center">
-                    <p className="text-xl font-semibold">{dashboardUser.averageScore}%</p>
+                    <p className="text-xl font-semibold">{currentUser.averageScore}%</p>
                     <p className="text-muted-foreground text-xs">Avg score</p>
                   </div>
                   <div className="rounded-2xl bg-muted/45 p-4 text-center sm:col-span-1 col-span-2">
-                    <p className="text-xl font-semibold">{dashboardUser.bestStreak}</p>
+                    <p className="text-xl font-semibold">{currentUser.bestStreak}</p>
                     <p className="text-muted-foreground text-xs">Best streak</p>
                   </div>
                 </div>
@@ -167,9 +179,11 @@ export default function ProfilePage() {
                 <div className="rounded-2xl border border-primary/20 bg-primary/8 p-4">
                   <p className="text-sm">Current rank</p>
                   <p className="mt-1 text-2xl font-semibold">#3</p>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    {me?.score.toLocaleString()} points across {me?.quizzesTaken} quizzes
-                  </p>
+                  {me ? (
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      {me.score.toLocaleString()} points across {me.quizzesTaken} quizzes
+                    </p>
+                  ) : null}
                 </div>
               </CardContent>
             </Card>

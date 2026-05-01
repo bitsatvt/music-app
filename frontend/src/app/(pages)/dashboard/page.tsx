@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import {
   ChevronRight,
@@ -18,6 +20,7 @@ import {
   dashboardQuizHistory,
   dashboardUser,
 } from "@/components/pages/DashboardPage/data"
+import { useAuthUser } from "@/lib/auth"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,36 +32,49 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-const stats = [
-  {
-    label: "Total Quizzes",
-    value: dashboardUser.totalQuizzes.toString(),
-    icon: Target,
-    iconClassName: "text-fuchsia-600",
-  },
-  {
-    label: "Avg Score",
-    value: `${dashboardUser.averageScore}%`,
-    icon: TrendingUp,
-    iconClassName: "text-emerald-600",
-  },
-  {
-    label: "Best Streak",
-    value: dashboardUser.bestStreak.toString(),
-    icon: Zap,
-    iconClassName: "text-amber-500",
-  },
-  {
-    label: "Leaderboard",
-    value: "#3",
-    icon: Trophy,
-    iconClassName: "text-orange-500",
-  },
-]
-
 export default function DashboardPage() {
+  const authUser = useAuthUser()
+  const currentUser = authUser
+    ? {
+        ...dashboardUser,
+        id: authUser.user_id.toString(),
+      }
+    : dashboardUser
+  const displayName = authUser?.username ?? ""
+  const firstName = authUser?.username.split(" ")[0] ?? ""
+  const email = authUser?.email ?? ""
+  const avatarInitials = authUser ? getInitials(authUser.username) : ""
   const recentQuizzes = dashboardQuizHistory.slice(0, 3)
   const topFriends = dashboardFriends.filter((friend) => friend.status === "online").slice(0, 3)
+  const leaderboard = dashboardLeaderboard.map((entry) =>
+    entry.isCurrentUser ? { ...entry, id: currentUser.id, name: authUser?.username ?? entry.name } : entry
+  )
+  const stats = [
+    {
+      label: "Total Quizzes",
+      value: currentUser.totalQuizzes.toString(),
+      icon: Target,
+      iconClassName: "text-fuchsia-600",
+    },
+    {
+      label: "Avg Score",
+      value: `${currentUser.averageScore}%`,
+      icon: TrendingUp,
+      iconClassName: "text-emerald-600",
+    },
+    {
+      label: "Best Streak",
+      value: currentUser.bestStreak.toString(),
+      icon: Zap,
+      iconClassName: "text-amber-500",
+    },
+    {
+      label: "Leaderboard",
+      value: "#3",
+      icon: Trophy,
+      iconClassName: "text-orange-500",
+    },
+  ]
 
   return (
     <main className="flex-1">
@@ -66,11 +82,11 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-muted-foreground text-sm">Dashboard</p>
-            <h1 className="text-xl font-semibold">Welcome back, {dashboardUser.name.split(" ")[0]}</h1>
+            <h1 className="text-xl font-semibold">{firstName ? `Welcome back, ${firstName}` : ""}</h1>
           </div>
           <Avatar className="size-11 ring-4 ring-fuchsia-500/10">
             <AvatarFallback className="bg-gradient-to-br from-fuchsia-500 to-violet-600 text-sm font-semibold text-white">
-              {getInitials(dashboardUser.name)}
+              {avatarInitials}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -86,7 +102,7 @@ export default function DashboardPage() {
                     Daily momentum
                   </Badge>
                   <h2 className="mb-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                    Welcome back, {dashboardUser.name}!
+                    {displayName ? `Welcome back, ${displayName}!` : ""}
                   </h2>
                   <p className="text-muted-foreground max-w-xl text-base md:text-lg">
                     Your dashboard is ready with fresh progress, featured practice modes, and a quick view of the friends pushing you forward this week.
@@ -95,13 +111,13 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-4 self-start rounded-3xl border bg-background/80 p-4 shadow-sm">
                   <Avatar className="size-14 ring-4 ring-fuchsia-500/10">
                     <AvatarFallback className="bg-gradient-to-br from-fuchsia-500 to-violet-600 text-base font-semibold text-white">
-                      {getInitials(dashboardUser.name)}
+                      {avatarInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="text-muted-foreground text-sm">Current Level</p>
-                    <p className="text-xl font-semibold">{dashboardUser.level}</p>
-                    <p className="text-muted-foreground text-sm">{dashboardUser.email}</p>
+                    <p className="text-xl font-semibold">{currentUser.level}</p>
+                    <p className="text-muted-foreground text-sm">{email}</p>
                   </div>
                 </div>
               </div>
@@ -291,7 +307,7 @@ export default function DashboardPage() {
                 <CardDescription>Current top players from your mock dataset.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {dashboardLeaderboard.map((entry, index) => (
+                {leaderboard.map((entry, index) => (
                   <div
                     key={entry.id}
                     className={`flex items-center justify-between rounded-2xl p-4 ${
@@ -326,6 +342,7 @@ export default function DashboardPage() {
 function getInitials(name: string) {
   return name
     .split(" ")
+    .filter(Boolean)
     .map((part) => part[0])
     .join("")
     .slice(0, 2)

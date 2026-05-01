@@ -1,9 +1,14 @@
+"use client"
+
+import { useEffect, useState } from "react"
+
 const AUTH_TOKEN_KEY = "authToken"
 const AUTH_USER_KEY = "authUser"
 
 export type AuthUser = {
   user_id: number
   username: string
+  email: string
 }
 
 /* Read the current auth token from localStorage for authenticated requests. */
@@ -40,4 +45,24 @@ export function getAuthUser(): AuthUser | null {
   catch {
     return null
   }
+}
+
+/* Read the current auth user into React state for client components. */
+export function useAuthUser() {
+  const [user, setUser] = useState<AuthUser | null>(null)
+
+  useEffect(() => {
+    setUser(getAuthUser())
+
+    function handleStorage(event: StorageEvent) {
+      if (event.key === AUTH_USER_KEY || event.key === null) {
+        setUser(getAuthUser())
+      }
+    }
+
+    window.addEventListener("storage", handleStorage)
+    return () => window.removeEventListener("storage", handleStorage)
+  }, [])
+
+  return user
 }

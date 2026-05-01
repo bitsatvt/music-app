@@ -46,8 +46,8 @@ export type DashboardFeature = {
 
 export const dashboardUser: DashboardUserSummary = {
   id: "1",
-  name: "Alex Chen",
-  email: "alex.chen@example.com",
+  name: "",
+  email: "",
   level: 12,
   totalQuizzes: 247,
   averageScore: 87.5,
@@ -139,7 +139,7 @@ export const dashboardLeaderboard: DashboardLeaderboardEntry[] = [
   },
   {
     id: "1",
-    name: "Alex Chen",
+    name: "You",
     score: 21637,
     quizzesTaken: 247,
     averageScore: 87.5,
