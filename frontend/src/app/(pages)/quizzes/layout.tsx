@@ -1,9 +1,9 @@
 import type { ReactNode } from "react"
 
-import { NavigationHeader } from "@/components/shared/NavigationHeader"
 import { ModeToggle } from "@/components/shared/ModeToggle"
+import { NavigationHeader } from "@/components/shared/NavigationHeader"
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function QuizzesLayout({ children }: { children: ReactNode }) {
   return (
     <div className="from-background via-background to-muted/40 min-h-screen bg-gradient-to-br">
       <NavigationHeader />
