@@ -84,9 +84,22 @@ export function NavigationHeader() {
             <Trophy className="size-4" />
             Leaderboard
           </Button>
-          <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} disabled>
-            <Users className="size-4" />
-            Friends
+          <Button
+            asChild
+            variant={pathname.startsWith("/friends") ? "default" : "ghost"}
+            size="sm"
+            className={`gap-2 ${
+              pathname.startsWith("/friends")
+                ? "bg-purple-600 text-white hover:bg-purple-700"
+                : isDarkMode
+                  ? "text-gray-300 hover:text-white hover:bg-gray-800"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            }`}
+          >
+            <Link href="/friends">
+              <Users className="size-4" />
+              Friends
+            </Link>
           </Button>
           <Button
             asChild

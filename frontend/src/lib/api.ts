@@ -1,7 +1,7 @@
 const BASE_URL = 'http://localhost:5000';
 
 function getToken() {
-  return localStorage.getItem('token');
+  return localStorage.getItem('authToken');
 }
 
 function authHeaders() {

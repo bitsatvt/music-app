@@ -6,6 +6,7 @@ import {
   Search, UserPlus, Users, X, Check, Trophy,
   ArrowLeft, Filter, Sun, Moon, UserMinus,
 } from 'lucide-react';
+import { ModeToggle } from '@/components/shared/ModeToggle'
 import { NavigationHeader } from '@/components/shared/NavigationHeader';
 import {
   getFriends,
@@ -103,6 +104,10 @@ function RequestRow({ req, type, onAccept, onDecline }: {
   req: FriendRequest; type: 'incoming' | 'outgoing';
   onAccept: (r: FriendRequest) => void; onDecline: (r: FriendRequest) => void;
 }) {
+  const { theme } = useTheme();
+  const isDark = theme !== 'light';
+  const text = isDark ? '#f0eff8' : '#111';
+  const muted = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
   const [loading, setLoading] = useState<'accept' | 'decline' | null>(null);
   const handle = async (action: 'accept' | 'decline') => {
     setLoading(action);
@@ -121,8 +126,8 @@ function RequestRow({ req, type, onAccept, onDecline }: {
     }}>
       <div style={{ position: 'relative' }}><DefaultAvatar name={req.username} size={42} /></div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: '#f0eff8' }}>{req.username}</div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: text }}>{req.username}</div>
+        <div style={{ fontSize: 12, color: muted, marginTop: 2 }}>
           {req.createdAt ?? (type === 'incoming' ? 'wants to be friends' : 'request pending')}
         </div>
       </div>
@@ -139,7 +144,7 @@ function RequestRow({ req, type, onAccept, onDecline }: {
           <button onClick={() => handle('decline')} disabled={!!loading} style={{
             display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px',
             borderRadius: 8, background: 'none', border: 'none',
-            color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500,
+            color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', fontSize: 13, fontWeight: 500,
             cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit',
           }}>
             <X size={14} />{loading === 'decline' ? '…' : 'Decline'}
@@ -171,6 +176,18 @@ function AllFriendsView({ friends, onBack, onRemove }: {
   const sortRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    
+    //checks for new friend requests every 30 seconds
+    const poll = setInterval(async () => {
+    try {
+      const inc = await getIncomingRequests();
+      setIncoming(inc);
+    } catch {
+      // silently fail
+    }
+  }, 30000);
+  return () => clearInterval(poll);
+    
     const h = (e: MouseEvent) => { if (sortRef.current && !sortRef.current.contains(e.target as Node)) setSortOpen(false); };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
@@ -301,7 +318,7 @@ function AllFriendsView({ friends, onBack, onRemove }: {
           </div>
         </div>
       </div>
-      <ThemeToggle />
+      <ModeToggle />
     </div>
   );
 }
@@ -327,29 +344,36 @@ export default function FriendsPage() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // TODO: replace mock data with real API calls when backend is running
-    // (async () => {
-    //   setLoading(true);
-    //   try {
-    //     const [f, inc, out] = await Promise.all([getFriends(), getIncomingRequests(), getOutgoingRequests()]);
-    //     setFriends(f); setIncoming(inc); setOutgoing(out);
-    //   } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to load'); }
-    //   finally { setLoading(false); }
-    // })();
-    setFriends([
-      { user_id: 1, username: 'sarah_j', points: 24891, level: 15, isOnline: true, lastActive: 'now' },
-      { user_id: 2, username: 'milo_t', points: 23456, level: 14, lastActive: '2h ago' },
-      { user_id: 3, username: 'saoirse_r', points: 20964, level: 13, isOnline: true, lastActive: 'now' },
-      { user_id: 4, username: 'tiago_d', points: 18543, level: 12, lastActive: '1 day ago' },
-      { user_id: 5, username: 'jessica_w', points: 17234, level: 11, isOnline: true, lastActive: 'now' },
-    ]);
-    setIncoming([
-      { user_id: 6, username: 'Lucas Wright', createdAt: '5 hours ago' },
-      { user_id: 7, username: 'Sophie Anderson', createdAt: '2 days ago' },
-    ]);
-    setOutgoing([{ user_id: 8, username: 'lucy_m', createdAt: '1 week ago' }]);
-    setLoading(false);
-  }, []);
+  (async () => {
+    setLoading(true);
+    try {
+      const [f, inc, out] = await Promise.all([
+        getFriends(),
+        getIncomingRequests(),
+        getOutgoingRequests(),
+      ]);
+      setFriends(f);
+      setIncoming(inc);
+      setOutgoing(out);
+    } catch {
+      // Backend not available — use mock data
+      setFriends([
+        { user_id: 1, username: 'sarah_j', points: 24891, level: 15, isOnline: true, lastActive: 'now' },
+        { user_id: 2, username: 'milo_t', points: 23456, level: 14, lastActive: '2h ago' },
+        { user_id: 3, username: 'saoirse_r', points: 20964, level: 13, isOnline: true, lastActive: 'now' },
+        { user_id: 4, username: 'tiago_d', points: 18543, level: 12, lastActive: '1 day ago' },
+        { user_id: 5, username: 'jessica_w', points: 17234, level: 11, isOnline: true, lastActive: 'now' },
+      ]);
+      setIncoming([
+        { user_id: 6, username: 'Lucas Wright', createdAt: '5 hours ago' },
+        { user_id: 7, username: 'Sophie Anderson', createdAt: '2 days ago' },
+      ]);
+      setOutgoing([{ user_id: 8, username: 'lucy_m', createdAt: '1 week ago' }]);
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, []);
 
   const handleSearch = useCallback((val: string) => {
     setSearchQuery(val);
@@ -363,10 +387,14 @@ export default function FriendsPage() {
     }, 350);
   }, []);
 
-  const handleSend = async (user: { user_id: number; username: string }) => {
-    try { await sendFriendRequest(user.user_id); setSent((prev) => new Set(prev).add(user.user_id)); }
-    catch (e: unknown) { setSearchError(e instanceof Error ? e.message : 'Failed to send'); }
-  };
+const handleSend = async (user: { user_id: number; username: string }) => {
+  try {
+    await sendFriendRequest(user.user_id);
+    setSent((prev) => new Set(prev).add(user.user_id));
+    setOutgoing((prev) => [...prev, { user_id: user.user_id, username: user.username }]);
+  }
+  catch (e: unknown) { setSearchError(e instanceof Error ? e.message : 'Failed to send'); }
+};
 
   const filteredFriends = friends.filter((f) => f.username.toLowerCase().includes(friendSearch.toLowerCase()));
 
@@ -422,11 +450,10 @@ export default function FriendsPage() {
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button onClick={() => setRequestTab('incoming')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 99, background: requestTab === 'incoming' ? '#16a34a' : 'transparent', border: requestTab === 'incoming' ? 'none' : `1px solid ${border}`, color: requestTab === 'incoming' ? '#fff' : muted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                       Received
-                      {incoming.length > 0 && <span style={{ background: requestTab === 'incoming' ? 'rgba(255,255,255,0.3)' : '#7c3aed', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 99, padding: '1px 7px' }}>{incoming.length}</span>}
+                      {incoming.length > 0 && <span style={{ background: requestTab === 'incoming' ? 'rgba(255,255,255,0.3)' : '#16a34a', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 99, padding: '1px 7px' }}>{incoming.length}</span>}
                     </button>
-                    <button onClick={() => setRequestTab('outgoing')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 99, background: 'transparent', border: `1px solid ${border}`, color: muted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                      Sent
-                      {outgoing.length > 0 && <span style={{ background: '#e24b4a', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 99, padding: '1px 7px' }}>{outgoing.length}</span>}
+                    <button onClick={() => setRequestTab('outgoing')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 99, background: requestTab === 'outgoing' ? '#e24b4a' : 'transparent', border: requestTab === 'outgoing' ? 'none' : `1px solid ${border}`, color: requestTab === 'outgoing' ? '#fff' : muted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>                      Sent
+                      {outgoing.length > 0 && <span style={{ background: requestTab === 'outgoing' ? 'rgba(255,255,255,0.3)' : '#e24b4a', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 99, padding: '1px 7px' }}>{outgoing.length}</span>}
                     </button>
                   </div>
                 </div>
@@ -546,7 +573,7 @@ export default function FriendsPage() {
           </div>
         )}
       </div>
-      <ThemeToggle />
+      <ModeToggle />
     </div>
   );
 }
