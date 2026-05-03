@@ -4,11 +4,12 @@ import { dashboardQuizHistory } from "@/components/pages/DashboardPage/data"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
 
 const quizCatalog = [
   {
-    id: "perfect-pitch",
-    title: "Perfect Pitch",
+    id: "tone-recognition",
+    title: "Tone Recognition",
     description: "Identify notes by ear with quick recognition drills.",
     gradient: "from-fuchsia-500 via-violet-500 to-indigo-600",
     icon: Headphones,
@@ -125,7 +126,14 @@ export default function QuizzesPage() {
                       <p className="text-muted-foreground text-xs">Best</p>
                     </div>
                   </div>
-                  <Button className="w-full">Start quiz</Button>
+                  {/* to be changed when more quizzes are made */}
+                  <Button className="w-full" asChild={quiz.id === "tone-recognition"}>
+                    {quiz.id === "tone-recognition" ? (
+                      <Link href="/identification">Start quiz</Link>
+                    ) : (
+                      "Start quiz"
+                    )}
+                  </Button>
                 </CardContent>
               </Card>
             )
