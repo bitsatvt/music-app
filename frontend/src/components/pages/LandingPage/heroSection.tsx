@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -23,20 +24,25 @@ export default function HeroSection() {
               bg-[#9D79BC] text-white hover:bg-[#8a68a8]
               dark:bg-[#9D79BC] dark:text-[#0a0a0f] dark:hover:bg-[#b08fd0]"
           >
-            Get Started
+            <Link
+              href="/signup"
+              className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+            >
+              Get Started
+            </Link>
             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Button>
         </div>
       </div>
 
       {/* Abstract music image at bottom */}
-      {/* <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-6xl opacity-20 pointer-events-none dark:opacity-10">
+      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-6xl opacity-20 pointer-events-none dark:opacity-10">
         <img
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPAcoQ3XlNlDiOzQ32VFKeE2Q4bCVTXgcyZzdBq_EJAi2Vlv_ADzpkQZ1KBnvnNtLGIwVB4SsBsX1_Up9E-4pG8BRo9fsmjKDWSpz5RJtah53Bj-gByoT6Z5FInmRwqIoXk7dBlXljGuhl_UHJIKlN78fR0-PxXHz4GLyjvDG3QxL-lTXFmZC_awFChpvzCTWQfliMrk5T1_I0buu0E5lEexAjXOmtHslYwxinNLVc_1VSpNjz3lcUPO2mNFN2GpjzlkV_qxzKbZZD"
+          src="/images/backgroundimg.png"
           alt=""
           className="w-full h-auto object-cover"
         />
-      </div> */}
+      </div>
     </section>
   );
 }

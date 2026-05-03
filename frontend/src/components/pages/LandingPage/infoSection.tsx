@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function InfoSection() {
   return (
@@ -144,7 +145,12 @@ export default function InfoSection() {
             Join thousands of musicians improving their skills every day
           </p>
           <Button className="h-12 px-8 text-base font-medium group bg-white text-[#9D79BC] hover:bg-white/90 dark:bg-[#9D79BC] dark:text-[#0a0a0f] dark:hover:bg-[#b08fd0]">
-            Get Started
+            <Link
+              href="/signup"
+              className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+            >
+              Get Started
+            </Link>
             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Button>
         </div>

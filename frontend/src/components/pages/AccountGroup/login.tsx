@@ -124,10 +124,9 @@ export default function LoginCard() {
               ) : null}
 
             </div>
-         
 
             {/* Footer */}
-            <CardFooter className="flex-col gap-2">
+            <CardFooter className="flex-col gap-4 pt-6">
               <Button type="submit" className="w-full bg-[#9D79BC] text-white hover:bg-[#8a68a8] dark:bg-[#9D79BC] dark:text-[#0a0a0f] dark:hover:bg-[#b08fd0]" disabled={isSubmitting}>
                 Login
               </Button>
